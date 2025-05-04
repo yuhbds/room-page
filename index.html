@@ -6,104 +6,95 @@
   <title>聊天室</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
+      font-family: sans-serif;
+      background-color: #ccc;
       text-align: center;
+      padding: 30px;
     }
-    input {
-      width: 80%;
+    input, button {
       padding: 10px;
-      margin: 10px 0;
-    }
-    button {
-      width: 84%;
-      padding: 10px;
-      margin-bottom: 20px;
-      background-color: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 5px;
+      margin: 10px;
       font-size: 16px;
     }
-    #launchButton {
+    .btn {
+      width: 200px;
+      display: block;
+      margin: 10px auto;
+    }
+    #openGameBtn {
       display: none;
-      background-color: #34a853;
+      background-color: #28a745;
+      color: white;
+      border: none;
     }
   </style>
 </head>
 <body>
-  <h2>聊天室</h2>
-  
+  <h1>聊天室</h1>
   <div>
     <label>昵称:</label><br/>
-    <input type="text" id="nickname" placeholder="请输入昵称" /><br/>
-    <button onclick="createRoom()">创建房间</button>
-  </div>
+    <input id="nickname" placeholder="请输入昵称" /><br/>
 
-  <div>
-    <label>房间号:</label><br/>
-    <input type="text" id="roomId" placeholder="请输入房间号" /><br/>
-    <button onclick="joinRoom()">加入房间</button>
-  </div>
+    <button class="btn" onclick="createRoom()">创建房间</button>
 
-  <button id="launchButton" onclick="launchGame()">点击跳转王者荣耀</button>
+    <input id="roomId" placeholder="房间号" /><br/>
+    <button class="btn" onclick="joinRoom()">加入房间</button>
+
+    <button id="openGameBtn" class="btn" onclick="openGame()">点击进入王者荣耀</button>
+  </div>
 
   <script>
-    let currentRoomId = "";
-    let currentName = "";
+    const API_BASE = 'https://ydhb.onrender.com';
 
-    async function createRoom() {
-      const nickname = document.getElementById("nickname").value.trim();
-      if (!nickname) return alert("请输入昵称");
+    function createRoom() {
+      const nickname = document.getElementById('nickname').value.trim();
+      if (!nickname) return alert('请输入昵称');
 
-      try {
-        const res = await fetch("https://ydhb.onrender.com/create-room", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: nickname })
+      fetch(`${API_BASE}/create-room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.room_id) {
+            document.getElementById('roomId').value = data.room_id;
+            showLaunchButton(data.room_id);
+          } else {
+            alert('创建失败');
+          }
         });
-        const data = await res.json();
-        if (data.room_id) {
-          alert("创建成功，房间号：" + data.room_id);
-          document.getElementById("roomId").value = data.room_id;
-        } else {
-          alert("创建失败");
-        }
-      } catch (err) {
-        alert("创建失败，请检查网络");
-      }
     }
 
-    async function joinRoom() {
-      const nickname = document.getElementById("nickname").value.trim();
-      const roomId = document.getElementById("roomId").value.trim();
-      if (!nickname || !roomId) return alert("请输入昵称和房间号");
+    function joinRoom() {
+      const nickname = document.getElementById('nickname').value.trim();
+      const roomId = document.getElementById('roomId').value.trim();
+      if (!nickname || !roomId) return alert('请输入昵称和房间号');
 
-      try {
-        const res = await fetch("https://ydhb.onrender.com/join-room", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ room_id: roomId })
+      fetch(`${API_BASE}/join-room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room_id: roomId })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.message && data.message.includes("Joined")) {
+            showLaunchButton(roomId);
+          } else {
+            alert(data.detail || data.message || '加入失败');
+          }
         });
-        const data = await res.json();
-        if (data.message && data.message.includes("Joined")) {
-          currentRoomId = roomId;
-          currentName = nickname;
-          document.getElementById("launchButton").style.display = "inline-block";
-          alert("加入成功，点击下方按钮进入王者荣耀");
-        } else {
-          alert(data.message || "加入失败");
-        }
-      } catch (err) {
-        alert("加入失败，请检查网络");
-      }
     }
 
-    function launchGame() {
-      if (currentRoomId && currentName) {
-        const url = `wlgame://room?room_id=${currentRoomId}&name=${encodeURIComponent(currentName)}`;
-        window.location.href = url;
-      }
+    function showLaunchButton(roomId) {
+      const btn = document.getElementById('openGameBtn');
+      btn.style.display = 'block';
+      btn.dataset.roomId = roomId;
+    }
+
+    function openGame() {
+      const roomId = document.getElementById('openGameBtn').dataset.roomId;
+      window.location.href = `wlgame://room?room_id=${roomId}`;
     }
   </script>
 </body>
