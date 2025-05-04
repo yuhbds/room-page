@@ -1,50 +1,78 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>房间系统</title>
+  <title>聊天室</title>
   <style>
-    body {
-      font-family: sans-serif;
-      max-width: 400px;
-      margin: 50px auto;
-      text-align: center;
-    }
-    input, button {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-    }
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
+    input, button { margin: 5px 0; width: 100%; padding: 8px; }
+    .room-info { margin-top: 20px; border: 1px solid #ccc; padding: 10px; }
   </style>
 </head>
 <body>
-  <h2>房间系统</h2>
+  <h2>聊天室</h2>
+
+  <label>昵称：</label>
+  <input type="text" id="username" placeholder="请输入昵称" />
 
   <button onclick="createRoom()">创建房间</button>
-  <p id="roomResult"></p>
 
-  <input type="text" id="roomId" placeholder="输入房间号">
+  <hr />
+
+  <label>房间号：</label>
+  <input type="text" id="roomId" placeholder="请输入房间号" />
+
   <button onclick="joinRoom()">加入房间</button>
-  <p id="joinResult"></p>
+
+  <div class="room-info" id="roomInfo" style="display: none;">
+    <h3>房间信息</h3>
+    <p><strong>房间号:</strong> <span id="roomIdDisplay"></span></p>
+    <p><strong>成员:</strong></p>
+    <ul id="userList"></ul>
+  </div>
 
   <script>
+    const API_BASE = "https://ydhb.onrender.com";
+
     async function createRoom() {
-      const res = await fetch('https://jinitaimeo.onrender.com/create-room', {
-        method: 'POST'
+      const username = document.getElementById("username").value.trim();
+      if (!username) return alert("请输入昵称");
+
+      const res = await fetch(`${API_BASE}/create-room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username })
       });
       const data = await res.json();
-      document.getElementById('roomResult').innerText = '房间号：' + data.room_id;
+      showRoom(data.room_id, data.users);
     }
 
     async function joinRoom() {
-      const roomId = document.getElementById('roomId').value;
-      const res = await fetch('https://jinitaimeo.onrender.com/join-room', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ room_id: roomId })
+      const username = document.getElementById("username").value.trim();
+      const roomId = document.getElementById("roomId").value.trim();
+      if (!username || !roomId) return alert("请输入昵称和房间号");
+
+      const res = await fetch(`${API_BASE}/join-room`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ room_id: roomId, username })
       });
       const data = await res.json();
-      document.getElementById('joinResult').innerText = data.message;
+      if (data.detail) return alert(data.detail);
+      showRoom(roomId, data.users);
+    }
+
+    function showRoom(roomId, users) {
+      document.getElementById("roomInfo").style.display = "block";
+      document.getElementById("roomIdDisplay").textContent = roomId;
+
+      const userList = document.getElementById("userList");
+      userList.innerHTML = "";
+      users.forEach(u => {
+        const li = document.createElement("li");
+        li.textContent = u;
+        userList.appendChild(li);
+      });
     }
   </script>
 </body>
