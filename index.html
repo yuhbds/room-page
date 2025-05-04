@@ -25,11 +25,15 @@
       border-radius: 5px;
       font-size: 16px;
     }
+    #launchButton {
+      display: none;
+      background-color: #34a853;
+    }
   </style>
 </head>
 <body>
   <h2>聊天室</h2>
-
+  
   <div>
     <label>昵称:</label><br/>
     <input type="text" id="nickname" placeholder="请输入昵称" /><br/>
@@ -42,7 +46,12 @@
     <button onclick="joinRoom()">加入房间</button>
   </div>
 
+  <button id="launchButton" onclick="launchGame()">点击跳转王者荣耀</button>
+
   <script>
+    let currentRoomId = "";
+    let currentName = "";
+
     async function createRoom() {
       const nickname = document.getElementById("nickname").value.trim();
       if (!nickname) return alert("请输入昵称");
@@ -78,13 +87,22 @@
         });
         const data = await res.json();
         if (data.message && data.message.includes("Joined")) {
-          // 正确的王者荣耀跳转地址
-          window.location.href = `tencentlaunch1104466820://room?room_id=${roomId}&name=${encodeURIComponent(nickname)}`;
+          currentRoomId = roomId;
+          currentName = nickname;
+          document.getElementById("launchButton").style.display = "inline-block";
+          alert("加入成功，点击下方按钮进入王者荣耀");
         } else {
           alert(data.message || "加入失败");
         }
       } catch (err) {
         alert("加入失败，请检查网络");
+      }
+    }
+
+    function launchGame() {
+      if (currentRoomId && currentName) {
+        const url = `wlgame://room?room_id=${currentRoomId}&name=${encodeURIComponent(currentName)}`;
+        window.location.href = url;
       }
     }
   </script>
