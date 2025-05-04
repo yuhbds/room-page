@@ -3,94 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>聊天室</title>
+  <title>加入王者荣耀房间</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 30px;
+      font-family: sans-serif;
+      padding: 20px;
       text-align: center;
     }
-    input {
+    input, button {
+      font-size: 18px;
+      margin: 10px;
+      padding: 10px;
       width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    button {
-      width: 84%;
-      padding: 10px;
-      margin-bottom: 20px;
-      background-color: #4285f4;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <h2>聊天室</h2>
-
-  <div>
-    <label>昵称:</label><br/>
-    <input type="text" id="nickname" placeholder="请输入昵称" /><br/>
-    <button onclick="createRoom()">创建房间</button>
-  </div>
-
-  <div>
-    <label>房间号:</label><br/>
-    <input type="text" id="roomId" placeholder="请输入房间号" /><br/>
-    <button onclick="joinRoom()">加入房间</button>
-  </div>
+  <h1>王者荣耀房间跳转</h1>
+  <input type="text" id="nickname" placeholder="请输入昵称"><br/>
+  <input type="text" id="roomId" placeholder="请输入房间号"><br/>
+  <button onclick="joinRoom()">加入房间</button>
 
   <script>
-    async function createRoom() {
-      const nickname = document.getElementById("nickname").value.trim();
-      if (!nickname) return alert("请输入昵称");
-
-      try {
-        const res = await fetch("https://ydhb.onrender.com/create-room", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: nickname })
-        });
-        const data = await res.json();
-        if (data.room_id) {
-          alert("创建成功，房间号：" + data.room_id);
-          document.getElementById("roomId").value = data.room_id;
-
-          // 创建成功后自动跳转
-          setTimeout(() => {
-            window.location.href = `https://yuhbds.github.io/room-page/redirect.html?room_id=${data.room_id}&name=${encodeURIComponent(nickname)}`;
-          }, 1000);
-        } else {
-          alert("创建失败");
-        }
-      } catch (err) {
-        alert("创建失败，请检查网络");
-      }
-    }
-
-    async function joinRoom() {
-      const nickname = document.getElementById("nickname").value.trim();
-      const roomId = document.getElementById("roomId").value.trim();
-      if (!nickname || !roomId) return alert("请输入昵称和房间号");
-
-      try {
-        const res = await fetch("https://ydhb.onrender.com/join-room", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ room_id: roomId })
-        });
-        const data = await res.json();
-        if (data.message && data.message.includes("Joined")) {
-          window.location.href = `https://yuhbds.github.io/room-page/redirect.html?room_id=${roomId}&name=${encodeURIComponent(nickname)}`;
-        } else {
-          alert(data.message || "加入失败");
-        }
-      } catch (err) {
-        alert("加入失败，请检查网络");
-      }
-    }
-  </script>
-</body>
-</html>
+    function joinRoom() {
+      const nickname = document.getElementById
