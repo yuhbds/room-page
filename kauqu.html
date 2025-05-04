@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>房间系统</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 50px auto;
+      text-align: center;
+    }
+    input, button {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h2>房间系统</h2>
+
+  <button onclick="createRoom()">创建房间</button>
+  <p id="roomResult"></p>
+
+  <input type="text" id="roomId" placeholder="输入房间号">
+  <button onclick="joinRoom()">加入房间</button>
+  <p id="joinResult"></p>
+
+  <script>
+    async function createRoom() {
+      const res = await fetch('https://jinitaimeo.onrender.com/create-room', {
+        method: 'POST'
+      });
+      const data = await res.json();
+      document.getElementById('roomResult').innerText = '房间号：' + data.room_id;
+    }
+
+    async function joinRoom() {
+      const roomId = document.getElementById('roomId').value;
+      const res = await fetch('https://jinitaimeo.onrender.com/join-room', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: roomId })
+      });
+      const data = await res.json();
+      document.getElementById('joinResult').innerText = data.message;
+    }
+  </script>
+</body>
+</html>
