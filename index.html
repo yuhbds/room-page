@@ -48,7 +48,7 @@
       if (!nickname) return alert("请输入昵称");
 
       try {
-        const res = await fetch("https://ydhb.onrender.com/create", {
+        const res = await fetch("https://ydhb.onrender.com/create-room", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name: nickname })
@@ -71,14 +71,13 @@
       if (!nickname || !roomId) return alert("请输入昵称和房间号");
 
       try {
-        const res = await fetch("https://ydhb.onrender.com/join", {
+        const res = await fetch("https://ydhb.onrender.com/join-room", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: nickname, room_id: roomId })
+          body: JSON.stringify({ room_id: roomId })
         });
         const data = await res.json();
-        if (data.success || data.message === "已加入") {
-          // 跳转王者荣耀链接
+        if (data.message && data.message.includes("Joined")) {
           window.location.href = `wlgame://room?room_id=${roomId}&name=${encodeURIComponent(nickname)}`;
         } else {
           alert(data.message || "加入失败");
