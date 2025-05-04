@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>跳转中...</title>
+  <script>
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      const roomId = params.get('room_id');
+      const name = params.get('name');
+
+      if (roomId && name) {
+        const link = `tencentlaunch1104466820://room?room_id=${roomId}&name=${encodeURIComponent(name)}`;
+        window.location.href = link;
+      } else {
+        document.body.innerHTML = "<p>参数缺失，无法跳转</p>";
+      }
+    };
+  </script>
+</head>
+<body>
+  <p>正在跳转到王者荣耀，请稍候...</p>
+</body>
+</html>
