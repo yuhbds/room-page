@@ -3,27 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>加入王者荣耀房间</title>
+  <title>聊天室</title>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      padding: 30px;
       text-align: center;
     }
-    input, button {
-      font-size: 18px;
-      margin: 10px;
-      padding: 10px;
+    input {
       width: 80%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    button {
+      width: 84%;
+      padding: 10px;
+      margin-bottom: 20px;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
     }
   </style>
 </head>
 <body>
-  <h1>王者荣耀房间跳转</h1>
-  <input type="text" id="nickname" placeholder="请输入昵称"><br/>
-  <input type="text" id="roomId" placeholder="请输入房间号"><br/>
-  <button onclick="joinRoom()">加入房间</button>
+  <h2>聊天室</h2>
+
+  <div>
+    <label>昵称:</label><br/>
+    <input type="text" id="nickname" placeholder="请输入昵称" /><br/>
+    <button onclick="createRoom()">创建房间</button>
+  </div>
+
+  <div>
+    <label>房间号:</label><br/>
+    <input type="text" id="roomId" placeholder="请输入房间号" /><br/>
+    <button onclick="joinRoom()">加入房间</button>
+  </div>
 
   <script>
-    function joinRoom() {
-      const nickname = document.getElementById
+    const API_BASE = "https://ydhb.onrender.com"; // 根据你后端地址替换
+
+    async function createRoom() {
+      const nickname = document.getElementById("nickname").value.trim();
+      if (!nickname) return alert("请输入昵称");
+
+      try {
+        const res = await fetch(`${API_BASE}/create-room`, {
+          method: "POST"
+        });
+        const data = await res.json();
+        if (data.room_id) {
+          alert("创建成功，房间号：" + data.room_id);
+          document.getElementById("roomId").value = data.room_id;
+          showInvite(data.room_id);
+        } else {
+          alert("创建失败");
+        }
+      } catch (err) {
+        alert("创建失败，请检查网络");
+      }
+    }
+
+    async function joinRoom() {
+      const nickname = document.getElementById("nickname").value.trim();
+      const roomId = document.getElementById("roomId").value.trim();
+      if (!nickname || !roomId) return alert("请输入昵称和房间号");
+
+      try {
+        const res = await fetch(`${API_BASE}/join-room`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ room_id: roomId })
+        });
+        const data = await res.json();
+        if (data.message && data.message.includes("Joined")) {
+          // 创建腾讯游戏中心的跳转链接
+          window.location.href = `http://gamecenter.qq.com/gcjump?appid=1104466820&pf=invite&from=iphoneqq&plat=qq&originuin=6ACC9A4936C1AFA4998A770BB9FD46FE&ADTAG=gameobj.msg_invite&gamedata=ShareTeam_1685793816_4049_${roomId}_${nickname}`;
+        } else {
+          alert(data.message || "加入失败");
+        }
+      } catch (err) {
+        alert("加入失败，请检查网络");
+      }
+    }
+
+    function showInvite(roomId) {
+      const nickname = encodeURIComponent(document.getElementById('nickname').value.trim());
+      const link = `${location.origin}/invite.html?room_id=${roomId}&name=${nickname}`;
+      document.getElementById('invite').innerHTML =
+        `分享此链接邀请好友：<br/><a href="${link}">${link}</a>`;
+    }
+  </script>
+</body>
+</html>
